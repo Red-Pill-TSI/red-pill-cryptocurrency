@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        //Table as an object
+        //Store variables
+        //Filter
+        //Update data from db
+        //Draw Table
+        //Update interval or/and manual update
+
+        //setup our table array
+        var tableArr = [
+            ["Bitcoin", "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/800px-Bitcoin.svg.png", "123"],
+            ["Dogecoin", "https://upload.wikimedia.org/wikipedia/en/d/d0/Dogecoin_Logo.png"],
+            ["Ether"]
+        ]
+
+        let currencyTable = document.createElement('table');
+        for (let row of tableArr) { //iterating rows
+            currencyTable.insertRow();
+            for (let cell of row) { //iterating columns
+                let newCell = currencyTable.rows[currencyTable.rows.length - 1].insertCell();
+                if (cell.includes("https://")){
+                    let image = document.createElement('img');
+                    image.src = cell;
+                    image.height = 50;
+                    image.width = 50;
+                    newCell.appendChild(image);
+                } else{
+                    newCell.textContent = cell;
+                }
+            }
+        }
+        //append the compiled table to the DOM
+        document.body.appendChild(currencyTable);
+    </script>
+
+
+
+
+</body>
+
+</html>

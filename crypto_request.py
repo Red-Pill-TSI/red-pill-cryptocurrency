@@ -10,10 +10,10 @@ def request_currency_info(args):
         "accept": "application/json",
         "x-cg-demo-api-key": "CG-Nmck2eYFfJEfpso69m3uePgY"
     }
+    currencies = ["usd", "eur"]
 
     if args[1].lower() == "markets":
 
-        currencies = ["usd", "eur"]
         if not args[2].lower() in currencies:
             return 1
 
@@ -24,7 +24,6 @@ def request_currency_info(args):
 
     if args[1].lower() == "ohlc":
 
-        currencies = ["usd", "eur"]
         if args[2].lower() == None or not args[3].lower() in currencies:
             return 1
 

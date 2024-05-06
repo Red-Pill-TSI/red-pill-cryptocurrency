@@ -1,2 +1,3 @@
-# red-pill-cryptocurrency
-Cryptocurrency monitoring web application development.
+# Red Pill Cryptocurrency
+
+Web application intended for monitoring cryptocurrency rates.

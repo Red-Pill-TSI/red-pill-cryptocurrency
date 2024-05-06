@@ -1,0 +1,12 @@
+{
+  "name": "red-pill-cryptocurrency",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "Web application intended for monitoring cryptocurrency rates.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

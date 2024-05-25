@@ -39,7 +39,6 @@ async function refreshCharts() {
     currency
   );
   updateMarketChart(marketData);
-  console.log(marketData);
 }
 
 function initializeCryptocurrencyTable() {
@@ -91,12 +90,24 @@ function updateCryptocurrencyTable(data) {
 }
 
 function updateOhlcChart(data) {
+  const currency = $("#currencySelect").val().toUpperCase();
   ohlcChart.data.datasets[0].data = data;
+  if (selectedCryptocurrency) {
+    ohlcChart.options.plugins.title.text = `${selectedCryptocurrency.name} OHLC (${currency})`;
+  } else {
+    ohlcChart.options.plugins.title.text = `OHLC`;
+  }
   ohlcChart.update();
 }
 
 function updateMarketChart(data) {
+  const currency = $("#currencySelect").val().toUpperCase();
   marketChart.data.datasets[0].data = data;
+  if (selectedCryptocurrency) {
+    marketChart.options.plugins.title.text = `${selectedCryptocurrency.name} Prices (${currency})`;
+  } else {
+    marketChart.options.plugins.title.text = `Prices`;
+  }
   marketChart.update();
 }
 
@@ -110,6 +121,7 @@ function initializeCryptocurrencyChart() {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+        title: { display: true, text: "OHLC" },
       },
     },
   });
@@ -123,6 +135,7 @@ function initializeCryptocurrencyChart() {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+        title: { display: true, text: "Price" },
       },
       scales: {
         x: {
@@ -202,7 +215,6 @@ async function fetchMarketChartData(id, currency) {
 
   const response = await fetch(url, options);
   const data = await response.json();
-  console.log(data);
   return transformMarketCharData(data.prices);
 }
 

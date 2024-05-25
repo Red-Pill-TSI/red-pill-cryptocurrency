@@ -1,8 +1,40 @@
-$(document).ready(function () {
-  // Initialize the cryptocurrencies table.
-  const table = $("#cryptocurrencies").DataTable({
-    data: generateCoinData(),
-    order: [],
+let chart = undefined;
+let table = undefined;
+let selectedCryptocurrency = undefined;
+
+$(document).ready(async function () {
+  initializeCryptocurrencyTable();
+  initializeCryptocurrencyChart();
+  initializeCurrencySelector();
+  initializeSubscriptionForm();
+  await refresh();
+});
+
+async function refresh() {
+  try {
+    await refreshTable();
+    if (selectedCryptocurrency) {
+      await refreshChart();
+    }
+  } catch (err) {
+    showRequestLimitAlert();
+  }
+}
+
+async function refreshTable() {
+  const currency = $("#currencySelect").val();
+  const data = await fetchTableData(currency);
+  updateCryptocurrencyTable(data);
+}
+
+async function refreshChart() {
+  const currency = $("#currencySelect").val();
+  const data = await fetchChartData(selectedCryptocurrency.id, currency);
+  updateCryptocurrencyChart(data);
+}
+
+function initializeCryptocurrencyTable() {
+  table = $("#crypto-table").DataTable({
     layout: {
       topStart: "search",
       topEnd: null,
@@ -10,157 +42,143 @@ $(document).ready(function () {
       bottomEnd: null,
     },
     columns: [
+      { data: "position" },
       {
-        data: "imageUrl",
+        data: "image",
         orderable: false,
         searchable: false,
         className: "text-center",
-        render: function (data) {
-          return `<img width="24" height="24" src="${data}" />`;
-        },
+        render: (value) => `<img width="24" height="24" src="${value}" />`,
       },
       { data: "name" },
-      { data: "symbol" },
-      {
-        data: "price",
-        render: function (data) {
-          return "$" + data;
-        },
-      },
+      { data: "symbol", render: (value) => value.toUpperCase() },
+      { data: "price", render: (value) => formatPrice(value) },
     ],
   });
 
-  $("#cryptocurrencies tbody").on("click", "tr", function (e) {
-    table
-      .rows(".selected")
-      .nodes()
-      .each((row) => row.classList.remove("selected"));
+  $("#crypto-table tbody").on("click", "tr", async function (e) {
+    const previous = table.rows(".selected").nodes().get(0);
+    const current = e.currentTarget;
 
-    const classList = e.currentTarget.classList;
-    classList.add("selected");
+    if (current !== previous) {
+      current.classList.add("selected");
+      if (previous) {
+        previous.classList.remove("selected");
+      }
 
-    const data = table.row(this).data();
-    console.log(data);
+      try {
+        selectedCryptocurrency = table.row(this).data();
+        await refreshChart();
+      } catch (err) {
+        showRequestLimitAlert();
+      }
+    }
   });
+}
 
-  // Initialize the crypctocurrency rate charts.
-  // TODO: Use appropriate chart type and data.
-  const chartData = generateChartData();
-  new Chart(document.getElementById("chart"), {
-    type: "line",
+function updateCryptocurrencyTable(data) {
+  table.clear();
+  table.rows.add(data).draw();
+}
+
+function updateCryptocurrencyChart(data) {
+  chart.data.datasets[0].data = data;
+  chart.update();
+}
+
+function initializeCryptocurrencyChart() {
+  chart = new Chart(document.getElementById("crypto-chart"), {
+    type: "candlestick",
     data: {
-      labels: chartData.map((row) => row.year),
-      datasets: [
-        {
-          label: "Price, USD",
-          data: chartData.map((row) => row.price),
-          tension: 0.5,
-        },
-      ],
+      datasets: [{ data: [] }],
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+      },
     },
   });
+}
 
-  // Initialize the currency selection control.
-  // TODO: Actually change the displayed currency on change.
+function initializeCurrencySelector() {
   $("#currencySelect").change(function () {
-    const selectedCurrency = $(this).val();
-    console.log(`Changed currency to '${selectedCurrency}'`);
+    refresh();
   });
+}
 
-  // Initialize the subscription submit button.
+function initializeSubscriptionForm() {
   // TODO: Actually register the email for notifications.
   $("#subscribe").submit(function (event) {
     event.preventDefault();
     const email = $("#subscribe :input[name='email']").val();
     console.log(`Subscribing to '${email}'`);
   });
-});
-
-// Obtained from: https://www.coingecko.com/
-// Note: For testing purposes only; remove once properly integrated with their API.
-function generateCoinData() {
-  return [
-    {
-      name: "Bitcoin",
-      symbol: "BTC",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/1/standard/bitcoin.png?1696501400",
-      price: "63,471.79",
-    },
-    {
-      name: "Ethereum",
-      symbol: "ETH",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/279/standard/ethereum.png?1696501628",
-      price: "3,101.60",
-    },
-    {
-      name: "Tether",
-      symbol: "USDT",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/325/standard/Tether.png?1696501661",
-      price: "0.9978",
-    },
-    {
-      name: "BNB",
-      symbol: "BNB",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png?1696501970",
-      price: "587.85",
-    },
-    {
-      name: "Solana",
-      symbol: "SOL",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/4128/standard/solana.png?1696504756",
-      price: "151.53",
-    },
-    {
-      name: "USDC",
-      symbol: "USDC",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/6319/standard/usdc.png?1696506694",
-      price: "0.9992",
-    },
-    {
-      name: "XRP",
-      symbol: "XRP",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/44/standard/xrp-symbol-white-128.png?1696501442",
-      price: "0.5291",
-    },
-    {
-      name: "Lido Staked Ether",
-      symbol: "STETH",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/13442/standard/steth_logo.png?1696513206",
-      price: "3,098.77",
-    },
-    {
-      name: "Dogecoin",
-      symbol: "DOGE",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/5/standard/dogecoin.png?1696501409",
-      price: "0.1583",
-    },
-    {
-      name: "Toncoin",
-      symbol: "TON",
-      imageUrl:
-        "https://assets.coingecko.com/coins/images/17980/standard/ton_symbol.png?1696517498",
-      price: "5.91",
-    },
-  ];
 }
 
-function generateChartData() {
-  return [
-    { year: 2010, price: 62431.79 },
-    { year: 2011, price: 54359.79 },
-    { year: 2012, price: 59872.79 },
-    { year: 2013, price: 54622.79 },
-    { year: 2014, price: 54722.79 },
-    { year: 2015, price: 58672.79 },
-    { year: 2016, price: 65342.79 },
-  ];
+async function fetchTableData(currency) {
+  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+    },
+  };
+
+  const response = await fetch(url, options);
+  const data = await response.json();
+  return transformTableData(data);
+}
+
+function transformTableData(data) {
+  return data.map((coin, index) => ({
+    id: coin.id,
+    name: coin.name,
+    image: coin.image,
+    price: coin.current_price,
+    symbol: coin.symbol,
+    position: index + 1,
+  }));
+}
+
+async function fetchChartData(id, currency) {
+  const url = `https://api.coingecko.com/api/v3/coins/${id}/ohlc?vs_currency=${currency}&days=1`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+    },
+  };
+
+  const response = await fetch(url, options);
+  const data = await response.json();
+  return transformChartData(data);
+}
+
+function transformChartData(data) {
+  return data.map(([x, o, h, l, c]) => ({ x, o, h, l, c }));
+}
+
+function formatPrice(value) {
+  const formatted = value.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  const currency = $("#currencySelect").val();
+  if (currency === "eur") {
+    return `${formatted}€`;
+  } else if (currency === "usd") {
+    return `$${formatted}`;
+  } else {
+    return formatted;
+  }
+}
+
+function showRequestLimitAlert() {
+  $("main").prepend(`
+    <div class="row">
+    <div id="alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <strong>Oops!</strong> We have reached a request limit. Try again later!
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  `);
 }

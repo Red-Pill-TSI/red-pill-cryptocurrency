@@ -172,13 +172,21 @@ function formatPrice(value) {
 }
 
 function showRequestLimitAlert() {
-  $("main").prepend(`
-    <div class="row">
-    <div id="alert" class="alert alert-danger alert-dismissible fade show" role="alert">
-      <i class="bi bi-exclamation-triangle-fill"></i>
-      <strong>Oops!</strong> We have reached a request limit. Try again later!
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  </div>
-  `);
+  const existingAlert = document.getElementById("alert");
+
+  if (existingAlert) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    $("main").prepend(`
+      <div class="row">
+        <div id="alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <strong>Oops!</strong> We have reached a request limit. Try again later!
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      </div>
+    `);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 }

@@ -1,0 +1,53 @@
+.about-us-section {
+    padding: 60px 0;
+}
+
+.about-us-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.about-us-content {
+    font-size: 1rem;
+    color: #6c757d;
+    text-align: justify;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 40px;
+}
+
+.btn-primary {
+    margin-top: 20px;
+}
+
+.icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+
+.coingecko-api {
+    border: 2px solid #ccc;
+    padding: 15px;
+    margin-top: 30px;
+    text-align: center;
+    background-color: #f8ffff;
+    border-radius: 10px;
+}
+
+.coingecko-api p {
+    margin: 0;
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.coingecko-api i {
+    font-size: 2rem;
+    color: #28a745;
+    margin-bottom: 10px;
+}

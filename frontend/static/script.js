@@ -1,5 +1,6 @@
-let chart = undefined;
 let table = undefined;
+let ohlcChart = undefined;
+let marketChart = undefined;
 let selectedCryptocurrency = undefined;
 
 $(document).ready(async function () {
@@ -14,7 +15,7 @@ async function refresh() {
   try {
     await refreshTable();
     if (selectedCryptocurrency) {
-      await refreshChart();
+      await refreshCharts();
     }
   } catch (err) {
     showRequestLimitAlert();
@@ -27,10 +28,18 @@ async function refreshTable() {
   updateCryptocurrencyTable(data);
 }
 
-async function refreshChart() {
+async function refreshCharts() {
   const currency = $("#currencySelect").val();
-  const data = await fetchChartData(selectedCryptocurrency.id, currency);
-  updateCryptocurrencyChart(data);
+
+  const ohlcData = await fetchOhlcData(selectedCryptocurrency.id, currency);
+  updateOhlcChart(ohlcData);
+
+  const marketData = await fetchMarketChartData(
+    selectedCryptocurrency.id,
+    currency
+  );
+  updateMarketChart(marketData);
+  console.log(marketData);
 }
 
 function initializeCryptocurrencyTable() {
@@ -68,7 +77,7 @@ function initializeCryptocurrencyTable() {
 
       try {
         selectedCryptocurrency = table.row(this).data();
-        await refreshChart();
+        await refreshCharts();
       } catch (err) {
         showRequestLimitAlert();
       }
@@ -81,13 +90,18 @@ function updateCryptocurrencyTable(data) {
   table.rows.add(data).draw();
 }
 
-function updateCryptocurrencyChart(data) {
-  chart.data.datasets[0].data = data;
-  chart.update();
+function updateOhlcChart(data) {
+  ohlcChart.data.datasets[0].data = data;
+  ohlcChart.update();
+}
+
+function updateMarketChart(data) {
+  marketChart.data.datasets[0].data = data;
+  marketChart.update();
 }
 
 function initializeCryptocurrencyChart() {
-  chart = new Chart(document.getElementById("crypto-chart"), {
+  ohlcChart = new Chart(document.getElementById("crypto-chart-ohlc"), {
     type: "candlestick",
     data: {
       datasets: [{ data: [] }],
@@ -96,6 +110,24 @@ function initializeCryptocurrencyChart() {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+      },
+    },
+  });
+
+  marketChart = new Chart(document.getElementById("crypto-chart-market"), {
+    type: "line",
+    data: {
+      datasets: [{ data: [], pointRadius: 0 }],
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        x: {
+          type: "time",
+        },
       },
     },
   });
@@ -141,7 +173,7 @@ function transformTableData(data) {
   }));
 }
 
-async function fetchChartData(id, currency) {
+async function fetchOhlcData(id, currency) {
   const url = `https://api.coingecko.com/api/v3/coins/${id}/ohlc?vs_currency=${currency}&days=1`;
   const options = {
     method: "GET",
@@ -152,11 +184,30 @@ async function fetchChartData(id, currency) {
 
   const response = await fetch(url, options);
   const data = await response.json();
-  return transformChartData(data);
+  return transformOhlcData(data);
 }
 
-function transformChartData(data) {
+function transformOhlcData(data) {
   return data.map(([x, o, h, l, c]) => ({ x, o, h, l, c }));
+}
+
+async function fetchMarketChartData(id, currency) {
+  const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=${currency}&days=1`;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+    },
+  };
+
+  const response = await fetch(url, options);
+  const data = await response.json();
+  console.log(data);
+  return transformMarketCharData(data.prices);
+}
+
+function transformMarketCharData(data) {
+  return data.map(([x, y]) => ({ x, y }));
 }
 
 function formatPrice(value) {

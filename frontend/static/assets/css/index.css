@@ -4,3 +4,14 @@
     border-radius: 10px;
     box-shadow: 0 4px 9px rgba(0, 0, 0, 0.1);
 }
+
+._prev, ._next {
+    position: relative;
+    top: 170px;
+}
+._next{
+    right:-30px;
+}
+._prev{
+    left:-30px;
+}

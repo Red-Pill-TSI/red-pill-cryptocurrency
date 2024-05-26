@@ -1,3 +1,6 @@
+// Only used for demonstration purposes.
+const COINGECKO_API_KEY = "CG-oNAAg4gUpDdzwHdbzskG1VoR";
+
 let table = undefined;
 let ohlcChart = undefined;
 let marketChart = undefined;
@@ -45,7 +48,7 @@ function initializeCryptocurrencyTable() {
   table = $("#crypto-table").DataTable({
     layout: {
       topStart: "search",
-      topEnd: null,
+      topEnd: { buttons: ["csv"] },
       bottomStart: "paging",
       bottomEnd: null,
     },
@@ -167,6 +170,7 @@ async function fetchTableData(currency) {
     method: "GET",
     headers: {
       accept: "application/json",
+      "x-cg-demo-api-key": COINGECKO_API_KEY,
     },
   };
 
@@ -192,6 +196,7 @@ async function fetchOhlcData(id, currency) {
     method: "GET",
     headers: {
       accept: "application/json",
+      "x-cg-demo-api-key": COINGECKO_API_KEY,
     },
   };
 
@@ -210,6 +215,7 @@ async function fetchMarketChartData(id, currency) {
     method: "GET",
     headers: {
       accept: "application/json",
+      "x-cg-demo-api-key": COINGECKO_API_KEY,
     },
   };
 

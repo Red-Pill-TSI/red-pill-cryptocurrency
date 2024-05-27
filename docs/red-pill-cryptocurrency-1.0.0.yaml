@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Red Pill Cryptocurrency API
+  description: Backend API for the Red Pill Cryptocurrency project.
+  contact:
+    email: gramattikutta@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/DANIILB/red-pill-cryptocurrency/1.0.0
+  description: SwaggerHub API Auto Mocking
+tags:
+- name: developers
+  description: Operations available to regular developers
+paths:
+  /subscribe:
+    post:
+      tags:
+      - developers
+      summary: subscribe to the cryptocurrency newsletter
+      description: Adds an email to the subscription newsletter list.
+      operationId: subscribe
+      requestBody:
+        description: Request body containing the user's email.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeRequest'
+      responses:
+        "200":
+          description: successfully subscribed to the newsletter
+        "400":
+          description: invalid request body
+  /emails-newsletter:
+    post:
+      tags:
+      - developers
+      summary: subscribe to the cryptocurrency newsletter
+      description: Adds an email to the subscription newsletter list.
+      operationId: send-newsletter
+      requestBody:
+        description: Request body containing a password for authentication.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsletterRequest'
+      responses:
+        "200":
+          description: successfully subscribed to the newsletter
+        "401":
+          description: provided an incorrect password
+        "500":
+          description: could not fetch cryptocurrency data
+components:
+  schemas:
+    SubscribeRequest:
+      required:
+      - isSubscribed
+      - userEmail
+      type: object
+      properties:
+        userEmail:
+          type: string
+          format: email
+          example: test@gmail.com
+        isSubscribed:
+          type: boolean
+          example: true
+    NewsletterRequest:
+      required:
+      - sendPassword
+      type: object
+      properties:
+        sendPassword:
+          type: string

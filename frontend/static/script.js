@@ -1,3 +1,6 @@
+// Only used for demonstration purposes.
+const COINGECKO_API_KEY = "CG-oNAAg4gUpDdzwHdbzskG1VoR";
+
 let table = undefined;
 let ohlcChart = undefined;
 let marketChart = undefined;
@@ -7,7 +10,6 @@ $(document).ready(async function () {
   initializeCryptocurrencyTable();
   initializeCryptocurrencyChart();
   initializeCurrencySelector();
-  initializeSubscriptionForm();
   await refresh();
 });
 
@@ -45,7 +47,7 @@ function initializeCryptocurrencyTable() {
   table = $("#crypto-table").DataTable({
     layout: {
       topStart: "search",
-      topEnd: null,
+      topEnd: { buttons: ["csv"] },
       bottomStart: "paging",
       bottomEnd: null,
     },
@@ -152,21 +154,13 @@ function initializeCurrencySelector() {
   });
 }
 
-function initializeSubscriptionForm() {
-  // TODO: Actually register the email for notifications.
-  $("#subscribe").submit(function (event) {
-    event.preventDefault();
-    const email = $("#subscribe :input[name='email']").val();
-    console.log(`Subscribing to '${email}'`);
-  });
-}
-
 async function fetchTableData(currency) {
   const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}`;
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
+      "x-cg-demo-api-key": COINGECKO_API_KEY,
     },
   };
 
@@ -192,6 +186,7 @@ async function fetchOhlcData(id, currency) {
     method: "GET",
     headers: {
       accept: "application/json",
+      "x-cg-demo-api-key": COINGECKO_API_KEY,
     },
   };
 
@@ -210,6 +205,7 @@ async function fetchMarketChartData(id, currency) {
     method: "GET",
     headers: {
       accept: "application/json",
+      "x-cg-demo-api-key": COINGECKO_API_KEY,
     },
   };
 
@@ -281,22 +277,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.status === 200) {
         if (responseData.is_new_user) {
-          alertDiv.innerHTML = '<div class="alert alert-success">Successfully subscribed!</div>';
+          alertDiv.innerHTML =
+            '<div class="alert alert-success">Successfully subscribed!</div>';
         } else {
-          alertDiv.innerHTML = '<div class="alert alert-warning">Email already exists. Subscription status updated.</div>';
+          alertDiv.innerHTML =
+            '<div class="alert alert-warning">Email already exists. Subscription status updated.</div>';
         }
         form.reset();
       } else if (response.status === 400) {
-        alertDiv.innerHTML = '<div class="alert alert-danger">Email is required.</div>';
+        alertDiv.innerHTML =
+          '<div class="alert alert-danger">Email is required.</div>';
       } else if (response.status === 409) {
-        alertDiv.innerHTML = '<div class="alert alert-warning">Email already exists.</div>';
+        alertDiv.innerHTML =
+          '<div class="alert alert-warning">Email already exists.</div>';
       } else {
-        alertDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again later.</div>';
+        alertDiv.innerHTML =
+          '<div class="alert alert-danger">An error occurred. Please try again later.</div>';
       }
     } catch (error) {
       console.error("Error:", error);
-      alertDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again later.</div>';
+      alertDiv.innerHTML =
+        '<div class="alert alert-danger">An error occurred. Please try again later.</div>';
     }
   });
 });
-

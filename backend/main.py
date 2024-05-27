@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI, Request, status, Response, Cookie, Form
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -13,8 +14,8 @@ from config import MONGO_DB, POST_EMAIL_PASSWORD
 from models import User
 from services import send_emails, create_newsletter_html, get_cryptocurrency_data
 
-
 DATABASE_NAME = 'red_pill'
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,6 +29,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.mount('/static', StaticFiles(directory='static'), name='static')
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get('/', response_class=JSONResponse)
@@ -35,18 +42,27 @@ async def root(request: Request):
     response = PlainTextResponse('Hello there!')
     return response
 
+
 @app.post('/subscription', response_class=JSONResponse)
 async def subscription(request: Request):
     json = await request.json()
     user_email = json.get('userEmail')
     is_subscribed = json.get('isSubscribed')
+
+    if not user_email:
+        return JSONResponse(content=dict(message='Email is required'), status_code=400)
+
     # Check if user_email is already in the database and update the subscription status
     user = await app.mongodb.users.find_one({'email': user_email})
-    if user and is_subscribed is not None:
-        await app.mongodb.users.update_one({'email': user_email}, {'$set': {'is_subscribed': is_subscribed}})
-        return JSONResponse(content=dict(is_new_user=False, user_id=user['user_id'], subscription_status=is_subscribed), status_code=200)
+    if user:
+        if is_subscribed is not None:
+            await app.mongodb.users.update_one({'email': user_email}, {'$set': {'is_subscribed': is_subscribed}})
+            return JSONResponse(
+                content=dict(is_new_user=False, user_id=user['user_id'], subscription_status=is_subscribed),
+                status_code=200)
+        return JSONResponse(content=dict(message='Email already exists'), status_code=409)
+
     # If user_email is not in the database, create a new user and set the subscription status
-    user = None
     if user_email:
         user = User(
             user_id=str(uuid4()),
@@ -55,8 +71,11 @@ async def subscription(request: Request):
             added_at=datetime.now(timezone.utc)
         ).model_dump()
         await app.mongodb.users.insert_one(user)
-        return JSONResponse(content=dict(is_new_user=True, user_id=user['user_id'] if user and user.get('user_id') else None, subscription_status=is_subscribed), status_code=200)
-    return JSONResponse(content=dict(user_id=None), status_code=400)
+        return JSONResponse(content=dict(is_new_user=True, user_id=user['user_id'], subscription_status=is_subscribed),
+                            status_code=200)
+
+    return JSONResponse(content=dict(message='Invalid request'), status_code=400)
+
 
 @app.post('/emails-newsletter', response_class=JSONResponse)
 async def emails_newsletter(request: Request):

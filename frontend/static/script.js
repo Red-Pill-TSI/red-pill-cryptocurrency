@@ -253,3 +253,50 @@ function showRequestLimitAlert() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("subscribe");
+  const emailInput = document.getElementById("email");
+  const alertDiv = document.getElementById("alert");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = emailInput.value;
+
+    const data = {
+      userEmail: email,
+      isSubscribed: true,
+    };
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/subscription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (response.status === 200) {
+        if (responseData.is_new_user) {
+          alertDiv.innerHTML = '<div class="alert alert-success">Successfully subscribed!</div>';
+        } else {
+          alertDiv.innerHTML = '<div class="alert alert-warning">Email already exists. Subscription status updated.</div>';
+        }
+        form.reset();
+      } else if (response.status === 400) {
+        alertDiv.innerHTML = '<div class="alert alert-danger">Email is required.</div>';
+      } else if (response.status === 409) {
+        alertDiv.innerHTML = '<div class="alert alert-warning">Email already exists.</div>';
+      } else {
+        alertDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again later.</div>';
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alertDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again later.</div>';
+    }
+  });
+});
+

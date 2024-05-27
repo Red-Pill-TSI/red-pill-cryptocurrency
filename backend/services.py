@@ -11,9 +11,7 @@ from config import GMAIL_EMAIL, GMAIL_PASSWORD, COINGECKO_API_KEY_1, COINGECKO_A
 HOST = 'smtp.gmail.com'
 PORT = 587
 
-
 async def send_emails(subject: str, to_emails: list, html: str | None = None, message: str | None = None):
-    # Login to the server email
     try:
         smtp = SMTP(HOST, PORT)
         smtp.ehlo()
@@ -21,7 +19,7 @@ async def send_emails(subject: str, to_emails: list, html: str | None = None, me
         smtp.login(GMAIL_EMAIL, GMAIL_PASSWORD)
     except SMTPException as e:
         return
-    # Send email to each email in the list
+
     for to_email in to_emails:
         try:
             msg = MIMEMultipart()
@@ -38,8 +36,8 @@ async def send_emails(subject: str, to_emails: list, html: str | None = None, me
             print(Fore.RED + f'[✖] Email not sent to: {to_email}. Error: {e}')
     smtp.quit()
 
+
 def create_newsletter_html(crypto_data: list) -> str:
-    # Create email content
     html = """
     <html>
     <head></head>
@@ -87,7 +85,6 @@ async def get_cryptocurrency_data():
         return response
 
     response = get_response(COINGECKO_API_KEY_1)
-    # Check if the response is successful
     if response.status_code != 200:
         response = get_response(COINGECKO_API_KEY_2)
         if response.status_code != 200:
@@ -95,18 +92,14 @@ async def get_cryptocurrency_data():
             return None
     crypto_data = response.json()
     crypto_data = [
-        dict(symbol=c.get('symbol'), 
-             name=c.get('name'), 
-             image=c.get('image'), 
-             current_price=c.get('current_price'), 
+        dict(symbol=c.get('symbol'),
+             name=c.get('name'),
+             image=c.get('image'),
+             current_price=c.get('current_price'),
              last_updated=c.get('last_updated')) for c in crypto_data
-        ]
-    # Sort crypto_data by current_price from highest to lowest
+    ]
     crypto_data.sort(key=lambda x: x['current_price'], reverse=True)
-    # Get the top 10 and bottom 10 cryptocurrencies
     crypto_data = crypto_data[:10] + crypto_data[-10:]
-    # Last updated should be in such form '26 May 2021, 12:00'
     for item in crypto_data:
         item['last_updated'] = datetime.strptime(item['last_updated'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d %b %Y, %H:%M')
     return crypto_data
-

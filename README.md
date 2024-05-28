@@ -51,7 +51,8 @@ under `docs`.
 
 ## Contributions
 
-This project was developed during a Web Application Development Tools course by the following group of students:
+This project was developed during a Web Application Development Tools course at [TSI](https://tsi.lv/) in collaboration
+with [UWE](https://newmy.uwe.ac.uk/) by the following group of students:
 
 * Anton Dronov (Project Manager) - controlled the overall development process.
 * Daniils Buts (Team Leader) - created carousel charts and the final cryptocurrency table.

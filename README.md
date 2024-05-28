@@ -58,7 +58,7 @@ This project was developed during a Web Application Development Tools course by 
 * Daniils Grammatikopulo (Frontend Developer) - created application branding and the "About Us" page.
 * Jūlija Belova (Frontend Developer) - integrated the subscription form with the backend.
 * Maksims Pavlovskis (Frontend Developer) - created the application's main layout.
-* Nikita Golovizņins (Business Analyst) - designed the cryptocurrency table; researched and setup the CoinGecko API. 
+* Nikita Golovizņins (Business Analyst) - designed the cryptocurrency table; integrated the CoinGecko API. 
 * Oļegs Ivanovs (Backend Developer) - created the server-side email newsletter functionality.
 
 Thanks to everyone for participating!
